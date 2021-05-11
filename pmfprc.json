@@ -1,0 +1,6 @@
+{
+    "env": "venv",
+    "added_components": {
+        "cp_py_files//func_as_decorator_with_args": "decorators/checkjsonschema.py"
+    }
+}
