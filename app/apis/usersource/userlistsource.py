@@ -2,7 +2,7 @@ from sanic.response import json, HTTPResponse
 from sanic.request import Request
 from sanic.views import HTTPMethodView
 from decorators.checkjsonschema import checkjsonschema
-from .usermodule import UserDB
+from modules.usermodule import UserDB
 
 
 post_query_schema = {

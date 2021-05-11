@@ -1,4 +1,12 @@
+import sys
+from typing import Sequence
+from app import Application
 
 
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=1337, workers=4)
+def main(argv: Sequence[str]) -> None:
+    app = Application()
+    app(argv)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])

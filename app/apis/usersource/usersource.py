@@ -4,7 +4,7 @@ from sanic.request import Request
 from sanic.response import json, HTTPResponse
 from jsonschema import validate
 from decorators.checkjsonschema import checkjsonschema
-from .usermodule import UserDB
+from modules.usermodule  import UserDB
 
 
 put_query_schema = {

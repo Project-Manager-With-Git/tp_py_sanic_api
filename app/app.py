@@ -1,13 +1,13 @@
-import sys
-from typing import List, Callable, Any, Dict
+import ssl
+from sanic import Sanic
 from pyloggerhelper import log
 from schema_entry import EntryPoint
+from apis import api
 
 
-
-class App(EntryPoint):
+class Application(EntryPoint):
     """jsonrpc项目的服务端启动入口."""
-    _name = "{{ app_name }}"
+    _name = "tp_py_sanic_api"
     schema = {
         "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
@@ -23,7 +23,7 @@ class App(EntryPoint):
                 "type": "string",
                 "title": "n",
                 "description": "应用名",
-                "default": "{{ app_name }}"
+                "default": "tp_py_sanic_api"
             },
             "address": {
                 "type": "string",
@@ -39,75 +39,69 @@ class App(EntryPoint):
                 "default": "DEBUG"
             },
             "debug": {
-                
+                "type": "boolean",
+                "description": "是否使用debug模式运行程序",
+                "default": True
             },
-            "access_log":{
-
+            "access_log": {
+                "type": "boolean",
+                "description": "是否运行程序时打印访问log",
+                "default": True
             },
-            "workers":{
-
+            "workers": {
+                "type": "integer",
+                "description": "是否多实例执行程序",
+                "default": 1
             },
-            "server_cert":{
-
+            "server_cert_path": {
+                "type": "string",
+                "description": "使用TLS时服务端的证书位置,如果为空则不适用TLS",
             },
-            "server_key":{
-
+            "server_key_path": {
+                "type": "string",
+                "description": "使用TLS时服务端证书的私钥位置",
             },
-            "authclient":
+            "ca_cert_path": {
+                "type": "string",
+                "description": "使用TLS时的签发机构证书,如果为空则不使用客户端验证",
+            },
+            "client_crl_path": {
+                "type": "string",
+                "description": "使用TLS客户端验证时的客户端权限吊销列表路劲",
+            }
         }
     }
-    register_instances: List[object]
-    register_functions: Dict[str, Callable]
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self.register_instances = []
-        self.register_functions = {}
-
-    def register_instance(self, instance: object) -> None:
-        self.register_instances.append(instance)
-
-    def register_function(self, name: str, func: Callable) -> None:
-        self.register_functions[name] = func
-
-    def run(self) -> None:
-        host, port = self.config["address"].split(":")
-        nofif_pool.start()
-        request_pool.start()
-        with PooledJSONRPCServer((host, int(port)), thread_pool=request_pool) as server:
-            # 注册所有可调用函数的名字到system.listMethods方法
-            # 注册可调用函数的docstring到system.methodHelp(func_name)方法
-            # 注册可调用函数的签名到system.methodSignature(func_name)方法
-            server.set_notification_pool(nofif_pool)
-            server.register_introspection_functions()
-            # 这个函数的作用是可以使客户端同时调用服务端的的多个函数。
-            server.register_multicall_functions()
-            # 注册一个类的实例,使其中的成员方法作为可调用的函数
-            for ins in self.register_instances:
-                server.register_instance(ins)
-
-            # 注册一个函数,使它可以被调用,后面的字符串就是被调用的函数名
-            for name, func in self.register_functions.items():
-                server.register_function(func, name)
-            # Run the server's main loop
-            log.info("jsonrpc start", address=f"tcp://{host}:{port}")
-            try:
-                server.serve_forever()
-            except KeyboardInterrupt:
-                log.info("jsonrpc stoped!", address=f"tcp://{host}:{port}")
-            except Exception as e:
-                log.error("jsonrpc servic get error!", address=f"tcp://{host}:{port}", err=type(e), err_msg=str(e), exc_info=True, stack_info=True)
-                sys.exit(1)
-            finally:
-                request_pool.stop()
-                nofif_pool.stop()
-                server.set_notification_pool(None)
-                log.info("jsonrpc stoped!", address=f"tcp://{host}:{port}")
 
     def do_main(self) -> None:
+        app_name = self.config.get("app_name", __name__)
+        log_level = self.config.get("log_level")
         log.initialize_for_app(
-            app_name=self.config.get("app_name"),
-            log_level=self.config.get("log_level")
+            app_name=app_name,
+            log_level=log_level
         )
         log.info("获取任务配置", config=self.config)
-        self.run()
+        sanic_app = Sanic(app_name)
+        sanic_app.config.FALLBACK_ERROR_FORMAT = "json"
+        sanic_app.blueprint(api)
+        host, port = self.config["address"].split(":")
+        conf = {
+            "host": host,
+            "port": int(port),
+            "workers": self.config.get("worker", 1),
+            "debug": self.config.get("debug", True),
+            "access_log": self.config.get("access_log", True),
+        }
+        if self.config.get("server_cert_path") and self.config.get("server_key_path"):
+            context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+            context.load_cert_chain(self.config.get("server_cert_path"), keyfile=self.config.get("server_key_path"))
+            if self.config.get("ca_cert_path"):
+                context.load_verify_locations(self.config.get("ca_cert_path"))
+                context.verify_mode = ssl.CERT_REQUIRED
+                if self.config.get('client_crl_path'):
+                    context.load_verify_locations(self.config.get('client_crl_path'))
+                    context.verify_flags = ssl.VERIFY_CRL_CHECK_LEAF
+                log.info("use TLS with client auth")
+            else:
+                log.info("use TLS")
+            conf["ssl"] = context
+        sanic_app.run(**conf)
