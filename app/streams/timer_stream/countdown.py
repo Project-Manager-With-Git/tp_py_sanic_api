@@ -1,13 +1,13 @@
 import asyncio
-from sanic import Blueprint
+from sanic.request import Request
+from sanic.response import HTTPResponse
 from .sseevent import SSEEvent
 
 
-@app.route("/countdown")
-async def countdown(request):
+async def countdown(request: Request, seconds: int) -> HTTPResponse:
     response = await request.respond(content_type="text/event-stream")
     eid = 0
-    for i in range(10, 0, -1):
+    for i in range(seconds, 0, -1):
         await response.send(str(SSEEvent(eid, str(i))))
         eid += 1
         await asyncio.sleep(1)
