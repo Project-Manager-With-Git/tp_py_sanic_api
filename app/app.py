@@ -3,6 +3,8 @@ from sanic import Sanic
 from pyloggerhelper import log
 from schema_entry import EntryPoint
 from apis import api
+from listeners import init_listeners
+from middlewares import init_middleware
 
 
 class Application(EntryPoint):
@@ -82,7 +84,13 @@ class Application(EntryPoint):
         log.info("获取任务配置", config=self.config)
         sanic_app = Sanic(app_name)
         sanic_app.config.FALLBACK_ERROR_FORMAT = "json"
+        # 注册蓝图
         sanic_app.blueprint(api)
+        # 注册listeners
+        init_listeners(sanic_app)
+        # 注册中间件
+        init_middleware(sanic_app)
+        # 启动
         host, port = self.config["address"].split(":")
         conf = {
             "host": host,

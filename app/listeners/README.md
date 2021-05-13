@@ -1,0 +1,3 @@
+# 适用范围
+
+如果在app的启动/结束(main_process_start/main_process_stop),worker的启动前后启动后(before_server_start/after_server_start),结束前和结束后(before_server_stop/after_server_stop)需要注册任务则使用监听器
