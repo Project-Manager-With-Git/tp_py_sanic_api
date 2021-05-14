@@ -3,9 +3,10 @@ from pyloggerhelper import log
 from schema_entry import EntryPoint
 from sanic import Sanic
 from sanic_openapi import openapi2_blueprint
-
-from apis import api
-from downloads import downloads
+from apis import init_api
+from downloads import init_downloads
+from channels import init_channels
+from ws import init_ws
 from listeners import init_listeners
 from middlewares import init_middleware
 
@@ -102,13 +103,19 @@ class Application(EntryPoint):
         if self.config.get("static_source_dir"):
             sanic_app.static("/static", self.config.get("static_source_dir"))
         # 注册蓝图
-        sanic_app.blueprint(api)
-        sanic_app.blueprint(downloads)
         sanic_app.blueprint(openapi2_blueprint)
         # 注册listeners
         init_listeners(sanic_app)
         # 注册中间件
         init_middleware(sanic_app)
+        # 注册restful接口
+        init_api(sanic_app)
+        # 注册下载接口
+        init_downloads(sanic_app)
+        # 注册基于sse的channels
+        init_channels(sanic_app)
+        # 注册websocket
+        init_ws(sanic_app)
         # 启动
         host, port = self.config["address"].split(":")
         conf = {

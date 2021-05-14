@@ -1,10 +1,9 @@
 from sanic.response import json, HTTPResponse
 from sanic.request import Request
 from sanic.views import HTTPMethodView
-from sanic_openapi import openapi
+from sanic_openapi import doc
 from decorators.checkjsonschema import checkjsonschema
 from modules.usermodule import UserDB
-
 
 post_query_schema = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -21,6 +20,8 @@ post_query_schema = {
 
 
 class UserListSource(HTTPMethodView):
+
+    @doc.summary("user接口总览")
     async def get(self, _: Request) -> HTTPResponse:
         cnt = await UserDB.len()
         result = {
@@ -52,6 +53,7 @@ class UserListSource(HTTPMethodView):
 
         return json(result, ensure_ascii=False)
 
+    @doc.summary("创建新用户")
     @checkjsonschema(post_query_schema)
     async def post(self, request: Request) -> HTTPResponse:
         query_json = request.json

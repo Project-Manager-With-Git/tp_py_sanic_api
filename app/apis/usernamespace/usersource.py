@@ -5,7 +5,7 @@ from sanic.response import json, HTTPResponse
 from sanic_openapi import doc
 from jsonschema import validate
 from decorators.checkjsonschema import checkjsonschema
-from modules.usermodule  import UserDB
+from modules.usermodule import UserDB
 
 
 put_query_schema = {
@@ -23,7 +23,8 @@ put_query_schema = {
 
 
 class UserSource(HTTPMethodView):
-    
+
+    @doc.summary("获取用户信息")
     async def get(self, _: Request, uid: int) -> HTTPResponse:
         try:
             u = await UserDB.find(uid)
@@ -38,6 +39,7 @@ class UserSource(HTTPMethodView):
         else:
             return json(asdict(u), ensure_ascii=False)
 
+    @doc.summary("更新用户信息")
     @checkjsonschema(put_query_schema)
     async def put(self, request: Request, uid: int) -> HTTPResponse:
         query_json = request.json
@@ -61,7 +63,8 @@ class UserSource(HTTPMethodView):
                 }, status=500, ensure_ascii=False)
             else:
                 return json({"msg": "更新成功"}, ensure_ascii=False)
-   
+
+    @doc.summary("删除用户")
     async def delete(self, _: Request, uid: int) -> HTTPResponse:
         try:
             await UserDB.delete(uid)
