@@ -1,8 +1,11 @@
 import ssl
-from sanic import Sanic
 from pyloggerhelper import log
 from schema_entry import EntryPoint
+from sanic import Sanic
+from sanic_openapi import openapi2_blueprint
+
 from apis import api
+from downloads import downloads
 from listeners import init_listeners
 from middlewares import init_middleware
 
@@ -39,6 +42,14 @@ class Application(EntryPoint):
                 "description": "log等级",
                 "enum": ["DEBUG", "INFO", "WARN", "ERROR"],
                 "default": "DEBUG"
+            },
+            "static_page_dir": {
+                "type": "string",
+                "description": "静态网页文件路径",
+            },
+            "static_source_dir": {
+                "type": "string",
+                "description": "静态资源文件路径",
             },
             "debug": {
                 "type": "boolean",
@@ -84,8 +95,16 @@ class Application(EntryPoint):
         log.info("获取任务配置", config=self.config)
         sanic_app = Sanic(app_name)
         sanic_app.config.FALLBACK_ERROR_FORMAT = "json"
+        # 注册插件
+        # 注册静态文件
+        if self.config.get("static_page_dir"):
+            sanic_app.static("/", self.config.get("static_page_dir"))
+        if self.config.get("static_source_dir"):
+            sanic_app.static("/static", self.config.get("static_source_dir"))
         # 注册蓝图
         sanic_app.blueprint(api)
+        sanic_app.blueprint(downloads)
+        sanic_app.blueprint(openapi2_blueprint)
         # 注册listeners
         init_listeners(sanic_app)
         # 注册中间件

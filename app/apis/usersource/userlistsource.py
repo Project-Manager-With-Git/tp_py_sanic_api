@@ -1,6 +1,7 @@
 from sanic.response import json, HTTPResponse
 from sanic.request import Request
 from sanic.views import HTTPMethodView
+from sanic_openapi import openapi
 from decorators.checkjsonschema import checkjsonschema
 from modules.usermodule import UserDB
 

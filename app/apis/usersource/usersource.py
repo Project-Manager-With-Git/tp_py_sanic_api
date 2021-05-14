@@ -2,6 +2,7 @@ from dataclasses import asdict
 from sanic.views import HTTPMethodView
 from sanic.request import Request
 from sanic.response import json, HTTPResponse
+from sanic_openapi import doc
 from jsonschema import validate
 from decorators.checkjsonschema import checkjsonschema
 from modules.usermodule  import UserDB
@@ -22,6 +23,7 @@ put_query_schema = {
 
 
 class UserSource(HTTPMethodView):
+    
     async def get(self, _: Request, uid: int) -> HTTPResponse:
         try:
             u = await UserDB.find(uid)
