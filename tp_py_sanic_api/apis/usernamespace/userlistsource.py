@@ -2,8 +2,8 @@ from sanic.response import json, HTTPResponse
 from sanic.request import Request
 from sanic.views import HTTPMethodView
 from sanic_openapi import doc
-from decorators.checkjsonschema import checkjsonschema
-from modules.usermodule import UserDB
+from tp_py_sanic_api.decorators.checkjsonschema import checkjsonschema
+from tp_py_sanic_api.models.usermodel import User
 
 post_query_schema = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -23,11 +23,11 @@ class UserListSource(HTTPMethodView):
 
     @doc.summary("user接口总览")
     async def get(self, _: Request) -> HTTPResponse:
-        cnt = await UserDB.len()
+        cnt = await User.all().count()
         result = {
-            "description": "测试api,User总览",
-            "user-count": cnt,
-            "links": [
+            "Description": "测试api,User总览",
+            "UserCount": cnt,
+            "Links": [
                 {
                     "uri": "/user",
                     "method": "POST",
@@ -53,12 +53,13 @@ class UserListSource(HTTPMethodView):
 
         return json(result, ensure_ascii=False)
 
+    @staticmethod
     @doc.summary("创建新用户")
     @checkjsonschema(post_query_schema)
-    async def post(self, request: Request) -> HTTPResponse:
+    async def post(request: Request) -> HTTPResponse:
         query_json = request.json
         try:
-            u = await UserDB.add(query_json.get("name", ""))
+            u = await User.create(name=query_json.get("name", ""))
         except Exception as e:
             return json({
                 "msg": "执行错误",
@@ -66,5 +67,5 @@ class UserListSource(HTTPMethodView):
         else:
             return json({
                 "msg": "插入成功",
-                "uid": u.ID
+                "uid": u.id
             }, ensure_ascii=False)

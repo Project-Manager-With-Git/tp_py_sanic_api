@@ -1,14 +1,84 @@
 import ssl
+from typing import Any, Dict
 from pyloggerhelper import log
 from schema_entry import EntryPoint
 from sanic import Sanic
 from sanic_openapi import openapi2_blueprint
-from apis import init_api
-from downloads import init_downloads
-from channels import init_channels
-from ws import init_ws
-from listeners import init_listeners
-from middlewares import init_middleware
+from .apis import init_api
+from .downloads import init_downloads
+from .channels import init_channels
+from .ws import init_ws
+from .listeners import init_listeners
+from .middlewares import init_middleware
+from .models import init_models
+
+
+def new_app(config: Dict[str, Any]) -> Sanic:
+    app_name = config.get("app_name", __name__)
+    log_level = config.get("log_level")
+    log.initialize_for_app(
+        app_name=app_name,
+        log_level=log_level
+    )
+    log.info("获取任务配置", config=config)
+    sanic_app = Sanic(app_name)
+    # 注册测试
+    if config.get("debug"):
+        from sanic_testing import TestManager
+        TestManager(sanic_app)
+
+    # 注册配置
+    sanic_app.config.FALLBACK_ERROR_FORMAT = "json"
+    # 注册插件
+    # 注册静态文件
+    if config.get("static_page_dir"):
+        sanic_app.static("/", config["static_page_dir"])
+    if config.get("static_source_dir"):
+        sanic_app.static("/static", config["static_source_dir"])
+    # 注册蓝图
+    sanic_app.blueprint(openapi2_blueprint)
+    # 注册数据模型
+    init_models(sanic_app)
+    # 注册listeners
+    init_listeners(sanic_app)
+    # 注册中间件
+    init_middleware(sanic_app)
+    # 注册restful接口
+    init_api(sanic_app)
+    # 注册下载接口
+    init_downloads(sanic_app)
+    # 注册基于sse的channels
+    init_channels(sanic_app)
+    # 注册websocket
+    init_ws(sanic_app)
+    return sanic_app
+
+
+def run_app(app: Sanic, config: Dict[str, Any]) -> None:
+    # 启动
+    host, port = config["address"].split(":")
+    conf = {
+        "host": host,
+        "port": int(port),
+        "workers": config.get("worker", 1),
+        "debug": config.get("debug", True),
+        "access_log": config.get("access_log", True),
+    }
+    # ssl相关配置
+    if config.get("server_cert_path") and config.get("server_key_path"):
+        context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
+        context.load_cert_chain(config["server_cert_path"], keyfile=config["server_key_path"])
+        if config.get("ca_cert_path"):
+            context.load_verify_locations(config["ca_cert_path"])
+            context.verify_mode = ssl.CERT_REQUIRED
+            if config.get('client_crl_path'):
+                context.load_verify_locations(config['client_crl_path'])
+                context.verify_flags = ssl.VERIFY_CRL_CHECK_LEAF
+            log.info("use TLS with client auth")
+        else:
+            log.info("use TLS")
+        conf["ssl"] = context
+    app.run(**conf)
 
 
 class Application(EntryPoint):
@@ -87,55 +157,5 @@ class Application(EntryPoint):
     }
 
     def do_main(self) -> None:
-        app_name = self.config.get("app_name", __name__)
-        log_level = self.config.get("log_level")
-        log.initialize_for_app(
-            app_name=app_name,
-            log_level=log_level
-        )
-        log.info("获取任务配置", config=self.config)
-        sanic_app = Sanic(app_name)
-        sanic_app.config.FALLBACK_ERROR_FORMAT = "json"
-        # 注册插件
-        # 注册静态文件
-        if self.config.get("static_page_dir"):
-            sanic_app.static("/", self.config.get("static_page_dir"))
-        if self.config.get("static_source_dir"):
-            sanic_app.static("/static", self.config.get("static_source_dir"))
-        # 注册蓝图
-        sanic_app.blueprint(openapi2_blueprint)
-        # 注册listeners
-        init_listeners(sanic_app)
-        # 注册中间件
-        init_middleware(sanic_app)
-        # 注册restful接口
-        init_api(sanic_app)
-        # 注册下载接口
-        init_downloads(sanic_app)
-        # 注册基于sse的channels
-        init_channels(sanic_app)
-        # 注册websocket
-        init_ws(sanic_app)
-        # 启动
-        host, port = self.config["address"].split(":")
-        conf = {
-            "host": host,
-            "port": int(port),
-            "workers": self.config.get("worker", 1),
-            "debug": self.config.get("debug", True),
-            "access_log": self.config.get("access_log", True),
-        }
-        if self.config.get("server_cert_path") and self.config.get("server_key_path"):
-            context = ssl.SSLContext(ssl.PROTOCOL_SSLv23)
-            context.load_cert_chain(self.config.get("server_cert_path"), keyfile=self.config.get("server_key_path"))
-            if self.config.get("ca_cert_path"):
-                context.load_verify_locations(self.config.get("ca_cert_path"))
-                context.verify_mode = ssl.CERT_REQUIRED
-                if self.config.get('client_crl_path'):
-                    context.load_verify_locations(self.config.get('client_crl_path'))
-                    context.verify_flags = ssl.VERIFY_CRL_CHECK_LEAF
-                log.info("use TLS with client auth")
-            else:
-                log.info("use TLS")
-            conf["ssl"] = context
-        sanic_app.run(**conf)
+        app = new_app(self.config)
+        run_app(app, self.config)

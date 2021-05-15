@@ -1,6 +1,6 @@
 import sys
 from typing import Sequence
-from app import Application
+from .app import Application
 
 
 def main(argv: Sequence[str]) -> None:
