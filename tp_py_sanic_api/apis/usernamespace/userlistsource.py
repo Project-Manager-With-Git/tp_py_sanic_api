@@ -3,7 +3,7 @@ from sanic.request import Request
 from sanic.views import HTTPMethodView
 from sanic_openapi import doc
 from tp_py_sanic_api.decorators.checkjsonschema import checkjsonschema
-from tp_py_sanic_api.models.usermodel import User
+from tp_py_sanic_api.models import User
 
 post_query_schema = {
     "$schema": "http://json-schema.org/draft-07/schema#",

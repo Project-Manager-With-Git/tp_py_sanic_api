@@ -1,3 +1,4 @@
+import asyncio
 import unittest
 from pathlib import Path
 from typing import Dict, Any
@@ -19,6 +20,7 @@ class APIQueryTest(unittest.TestCase):
 
     @async_test
     async def test_userlist_get(self) -> None:
+        await asyncio.sleep(1)
         _, response = await self.cli.get("/v1/api/user")
         assert response.status == 200
         assert response.json.get("UserCount") == 0

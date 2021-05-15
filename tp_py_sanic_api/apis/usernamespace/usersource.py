@@ -5,7 +5,7 @@ from sanic.response import json, HTTPResponse
 from sanic_openapi import doc
 from jsonschema import validate
 from tp_py_sanic_api.decorators.checkjsonschema import checkjsonschema
-from tp_py_sanic_api.models.usermodel import User
+from tp_py_sanic_api.models import User
 
 
 put_query_schema = {
