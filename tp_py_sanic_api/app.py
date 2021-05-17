@@ -4,13 +4,13 @@ from pyloggerhelper import log
 from schema_entry import EntryPoint
 from sanic import Sanic
 from sanic_openapi import openapi2_blueprint
-from .apis import init_api
-from .downloads import init_downloads
-from .channels import init_channels
-from .ws import init_ws
-from .listeners import init_listeners
-from .middlewares import init_middleware
-from .models import init_models
+from apis import init_api
+from downloads import init_downloads
+from channels import init_channels
+from ws import init_ws
+from listeners import init_listeners
+from middlewares import init_middleware
+from models import init_models
 
 
 def new_app(config: Dict[str, Any]) -> Sanic:

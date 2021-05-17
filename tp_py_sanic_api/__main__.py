@@ -1,12 +1,12 @@
 import sys
 from typing import Sequence
-from .app import Application
+from app import Application
 
 
-def main(argv: Sequence[str]) -> None:
+def main(argv: Sequence[str] = sys.argv[1:]) -> None:
     app = Application()
     app(argv)
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    main()
