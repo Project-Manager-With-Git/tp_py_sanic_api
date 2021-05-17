@@ -1,11 +1,9 @@
-from dataclasses import asdict
 from sanic.views import HTTPMethodView
 from sanic.request import Request
 from sanic.response import json, HTTPResponse
 from sanic_openapi import doc
-from jsonschema import validate
-from decorators.checkjsonschema import checkjsonschema
-from models import User
+from ...decorators.checkjsonschema import checkjsonschema
+from ...models import User
 
 
 put_query_schema = {

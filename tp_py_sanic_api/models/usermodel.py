@@ -9,7 +9,7 @@ class User(Model):
     id = IntField(pk=True)
     name = CharField(50)
 
-    def __str__(self)->str:
+    def __str__(self) -> str:
         return f"User {self.id}: {self.name}"
 
     def to_dict(self) -> Dict[str, Union[str, int]]:
