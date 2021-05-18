@@ -1,0 +1,81 @@
+{
+    "language": "py",
+    "description": "sanic构造RESTful的http接口服务的模板,注意该模板构造的是一个带有`__main__.py`的模块,因此使用`python -m xxx`执行.同时该模块无法打包为pyz",
+    "author": "hsz",
+    "template_type": "socket",
+    "requires": [
+        "sanic >= 21.3.4",
+        "jsonschema >= 3.2.0",
+        "pyloggerhelper >= 0.0.2",
+        "sanic-openapi >= 21.3.1",
+        "sanic-testing >= 0.4.0",
+        "tortoise-orm >= 0.17.2"
+    ],
+    "test_requires": [
+        "coverage >= 5.5",
+        "mypy >= 0.800",
+        "autopep8 >= 1.5.6",
+        "pylint >= 2.8.0",
+        "pydocstyle>=6.0.0",
+        "requests >= 2.25.1",
+        "aiounittest >= 1.4.0"
+    ],
+    "template_keys": {
+        "app_name": {
+            "description": "应用名",
+            "default": "{{ project_name }}"
+        }
+    },
+    "components": {
+        "apis": {
+            "source": "cp_py_sanic//apis",
+            "description": "RESTful接口组件模板",
+            "default_path": "{{ project_name }}/apis"
+        },
+        "decorators": {
+            "source": "cp_py_sanic//decorators",
+            "description": "装饰器组件模板",
+            "default_path": "{{ project_name }}/decorators/__init__.py"
+        },
+        "decorator_checkjsonschema": {
+            "source": "cp_py_sanic//decorator_checkjsonschema",
+            "description": "通过jsonschema校验请求body的装饰器",
+            "default_path": "{{ project_name }}/decorators/checkjsonschema.py"
+        },
+        "listeners": {
+            "source": "cp_py_sanic//listeners",
+            "description": "sanic的hooks定义",
+            "default_path": "{{ project_name }}/listeners"
+        },
+        "middlewares": {
+            "source": "cp_py_sanic//middlewares",
+            "description": "sanic的中间件定义",
+            "default_path": "{{ project_name }}/middlewares"
+        },
+        "models": {
+            "source": "cp_py_sanic//models",
+            "description": "sanic使用的异步的orm定义数据模型的组件",
+            "default_path": "{{ project_name }}/models"
+        },
+        "main": {
+            "source": "__main__.py.jinja",
+            "description": "sanic项目的模块的入口组件",
+            "default_path": "{{ project_name }}/__main__.py"
+        },
+        "init": {
+            "source": "__init__.py.jinja",
+            "description": "sanic项目的模块__init__.py文件",
+            "default_path": "{{ project_name }}/__init__.py"
+        },
+        "docker-compose": {
+            "source": "cp_dockercompose//server_standalone",
+            "description": "通用的服务使用的dockercompose,适用于调试",
+            "default_path": "docker-compose.yml"
+        },
+        "dockerfile": {
+            "source": "cp_py_sanic//dockerfile",
+            "description": "构造sanic项目的dockerfile",
+            "default_path": "dockerfile"
+        }
+    }
+}

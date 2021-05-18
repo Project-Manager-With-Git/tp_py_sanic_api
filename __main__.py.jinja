@@ -4,11 +4,9 @@ from pathlib import Path
 from typing import Any, Dict
 from pyloggerhelper import log
 from sanic import Sanic
+from sanic.log import logger, error_logger, access_logger
 from sanic_openapi import openapi2_blueprint
 from .apis import init_api
-from .downloads import init_downloads
-from .channels import init_channels
-from .ws import init_ws
 from .listeners import init_listeners
 from .middlewares import init_middleware
 from .models import init_models
@@ -20,11 +18,13 @@ def new_app() -> Sanic:
     if configfilep.is_file():
         with open(configfilep) as f:
             config = json.load(f)
-
-    app_name = config.get("APP_NAME", __name__)
+    app_name = config.get("APP_NAME", __package__)
     sanic_app = Sanic(app_name, load_env=f'{app_name.upper()}_')
     sanic_app.update_config(config)
     log_level = sanic_app.config.get("LOG_LEVEL", "DEBUG")
+    logger.setLevel(log_level)
+    error_logger.setLevel(log_level)
+    access_logger.setLevel(log_level)
     log.initialize_for_app(
         app_name=app_name,
         log_level=log_level
@@ -54,17 +54,11 @@ def new_app() -> Sanic:
     init_middleware(sanic_app)
     # 注册restful接口
     init_api(sanic_app)
-    # 注册下载接口
-    init_downloads(sanic_app)
-    # 注册基于sse的channels
-    init_channels(sanic_app)
-    # 注册websocket
-    init_ws(sanic_app)
     return sanic_app
 
 
 app = new_app()
-address = app.config.get("ADDRESS", "localhost:5000")
+address = app.config.get("ADDRESS", "0.0.0.0:5000")
 host, port = address.split(":")
 conf = {
     "host": host,
@@ -87,4 +81,5 @@ if app.config.get("SERV_CERT_PATH") and app.config.get("SERV_KEY_PATH"):
     else:
         log.info("use TLS")
     conf["ssl"] = context
+log.info("server start", config=conf)
 app.run(**conf)
