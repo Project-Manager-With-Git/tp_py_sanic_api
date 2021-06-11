@@ -27,10 +27,15 @@
         }
     },
     "components": {
-        "apis": {
-            "source": "cp_py_sanic//apis",
+        "apis_init": {
+            "source": "cp_py_sanic//apis_init",
             "description": "RESTful接口组件模板",
-            "default_path": "{{ project_name }}/apis"
+            "default_path": "{{ project_name }}/apis/__init__.py"
+        },
+        "apis_namespace": {
+            "source": "cp_py_sanic//apis_namespace",
+            "description": "RESTful接口组件模板",
+            "default_path": "{{ project_name }}/apis/{{ apinamespace }}namespace"
         },
         "decorators": {
             "source": "cp_py_sanic//decorators",
@@ -57,13 +62,18 @@
             "description": "sanic使用的异步的orm定义数据模型的组件",
             "default_path": "{{ project_name }}/models"
         },
+        "serv": {
+            "source": "serv",
+            "description": "sanic的服务启动配置",
+            "default_path": "{{ project_name }}/serv"
+        },
         "main": {
-            "source": "__main__.py.jinja",
+            "source": "cp_py_sanic//main",
             "description": "sanic项目的模块的入口组件",
             "default_path": "{{ project_name }}/__main__.py"
         },
         "init": {
-            "source": "__init__.py.jinja",
+            "source": "cp_py_files//initfile",
             "description": "sanic项目的模块__init__.py文件",
             "default_path": "{{ project_name }}/__init__.py"
         },
@@ -73,7 +83,7 @@
             "default_path": "docker-compose.yml"
         },
         "dockerfile": {
-            "source": "cp_py_sanic//dockerfile",
+            "source": "cp_dockerfiles//python_http_ext_dockerfile",
             "description": "构造sanic项目的dockerfile",
             "default_path": "dockerfile"
         }
