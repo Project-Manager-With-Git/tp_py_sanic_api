@@ -28,37 +28,37 @@
     },
     "components": {
         "apis_init": {
-            "source": "cp_py_sanic//apis_init",
+            "source": "cp_py_sanic@v0.0.1//apis_init",
             "description": "RESTful接口组件模板",
             "default_path": "{{ project_name }}/apis/__init__.py"
         },
         "apis_namespace": {
-            "source": "cp_py_sanic//apis_namespace",
+            "source": "cp_py_sanic@v0.0.1//apis_namespace",
             "description": "RESTful接口组件模板",
             "default_path": "{{ project_name }}/apis/{{ apinamespace }}namespace"
         },
         "decorators": {
-            "source": "cp_py_sanic//decorators",
+            "source": "cp_py_sanic@v0.0.1//decorators",
             "description": "装饰器组件模板",
             "default_path": "{{ project_name }}/decorators/__init__.py"
         },
         "decorator_checkjsonschema": {
-            "source": "cp_py_sanic//decorator_checkjsonschema",
+            "source": "cp_py_sanic@v0.0.1//decorator_checkjsonschema",
             "description": "通过jsonschema校验请求body的装饰器",
             "default_path": "{{ project_name }}/decorators/checkjsonschema.py"
         },
         "listeners": {
-            "source": "cp_py_sanic//listeners",
+            "source": "cp_py_sanic@v0.0.1//listeners",
             "description": "sanic的hooks定义",
             "default_path": "{{ project_name }}/listeners"
         },
         "middlewares": {
-            "source": "cp_py_sanic//middlewares",
+            "source": "cp_py_sanic@v0.0.1//middlewares",
             "description": "sanic的中间件定义",
             "default_path": "{{ project_name }}/middlewares"
         },
         "models": {
-            "source": "cp_py_sanic//models",
+            "source": "cp_py_sanic@v0.0.1//models",
             "description": "sanic使用的异步的orm定义数据模型的组件",
             "default_path": "{{ project_name }}/models"
         },
@@ -68,22 +68,22 @@
             "default_path": "{{ project_name }}/serv"
         },
         "main": {
-            "source": "cp_py_sanic//main",
+            "source": "cp_py_sanic@v0.0.1//main",
             "description": "sanic项目的模块的入口组件",
             "default_path": "{{ project_name }}/__main__.py"
         },
         "init": {
-            "source": "cp_py_files//initfile",
+            "source": "cp_py_files@v0.0.1//initfile",
             "description": "sanic项目的模块__init__.py文件",
             "default_path": "{{ project_name }}/__init__.py"
         },
         "docker-compose": {
-            "source": "cp_dockercompose//server_standalone",
+            "source": "cp_dockercompose@v0.0.2//server_standalone",
             "description": "通用的服务使用的dockercompose,适用于调试",
             "default_path": "docker-compose.yml"
         },
         "dockerfile": {
-            "source": "cp_dockerfiles//python_http_ext_dockerfile",
+            "source": "cp_dockerfiles@v0.0.1//python_http_ext_dockerfile",
             "description": "构造sanic项目的dockerfile",
             "default_path": "dockerfile"
         }
